@@ -31,6 +31,7 @@ import datetime
 import csv
 import os
 import pickle
+import json
 
 
 def _time_to_datetime(time_str):
@@ -53,7 +54,7 @@ class Sessions(object):
 
     def start(self, description, start=None):
         if self.open_session is not None:
-            raise ValueError(f"There is already an open session:\n{self.get_open()}")
+            raise ValueError("There is already an open session:\n{:s}".format(self.get_open()))
 
         if start:
             start = _time_to_datetime(start)
@@ -103,7 +104,7 @@ class Sessions(object):
     def __str__(self):
         lines = []
         for i, session in enumerate(self.sessions):
-            lines.append(f"{i}. {session}")
+            lines.append("{:d}. {:s}".format(i, session))
         return "\n".join(lines)
 
 class Session(object):
@@ -134,27 +135,34 @@ class Session(object):
         date_format = "%Y-%m-%d"
         formatted_start = self.start.strftime(date_format)
         duration = _duration_as_hours(self.start, self.end)
-        formatted_duration = f"{duration:.8f}"
+        formatted_duration = "{:.8f}".format(duration)
 
-        return f"{formatted_start},,{self.description},{formatted_duration}"
+        return "{:s},,{:s},{:s}".format(formatted_start, self.description, formatted_duration)
 
-LOG_FILE = '/home/robert-jan/wbso/wbso_log.pickle'
 SESSIONS = Sessions()
 
 
+def log_path():
+    tool_dir = os.path.dirname(os.path.realpath(__file__))
+    return os.path.join(tool_dir, 'wbso_log.pickle')
+
 def load():
-    if not os.path.exists(LOG_FILE):
-        with open(LOG_FILE, 'w') as f:
+    log_file = log_path()
+
+    if not os.path.exists(log_file):
+        with open(log_file, 'w') as f:
             pass
         print("Created new log file.")
         return Sessions()
 
-    with open(LOG_FILE, 'rb') as f:
+    with open(log_file, 'rb') as f:
         sessions = pickle.load(f)
         return sessions
 
 def save(sessions):
-    with open(LOG_FILE, 'wb') as f:
+    log_file = log_path()
+
+    with open(log_file, 'wb') as f:
         pickle.dump(sessions, f)
 
 if __name__ == '__main__':
@@ -190,7 +198,7 @@ if __name__ == '__main__':
         # Clear
         nr_sessions = len(SESSIONS.get_all())
         SESSIONS.clear()
-        print(f"{nr_sessions} sessions cleared.")
+        print("{:d} sessions cleared.".format(nr_sessions))
 
     elif args['DESCRIPTION']:
         # Log / open
@@ -228,12 +236,12 @@ if __name__ == '__main__':
         # Export each unique tuple (date, description)
         for date in sess_durations:
             for description in sess_durations[date]:
-                print(f"{date},,{description},{sess_durations[date][description]:.8f}")
+                print("{:s},,{:s},{:.8f}".format(date, description, sess_durations[date][description]))
 
     else:
         # Report
         if SESSIONS.open_session:
-            print(f"Open session: \n{SESSIONS.get_open()}")
+            print("Open session: \n{:s}".format(SESSIONS.get_open()))
         if len(SESSIONS.get_all()) == 0:
             print("No sessions.")
         else:
