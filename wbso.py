@@ -104,7 +104,7 @@ class Sessions(object):
     def __str__(self):
         lines = []
         for i, session in enumerate(self.sessions):
-            lines.append("{:d}. {:s}".format(i, session))
+            lines.append("{:d}. {:s}".format(i, str(session)))
         return "\n".join(lines)
 
 class Session(object):
@@ -241,7 +241,7 @@ if __name__ == '__main__':
     else:
         # Report
         if SESSIONS.open_session:
-            print("Open session: \n{:s}".format(SESSIONS.get_open()))
+            print("Open session: \n{:s}".format(str(SESSIONS.get_open())))
         if len(SESSIONS.get_all()) == 0:
             print("No sessions.")
         else:
