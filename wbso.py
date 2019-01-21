@@ -8,15 +8,13 @@ Usage:
     wbso.py DESCRIPTION
     wbso.py START DESCRIPTION
     wbso.py START END DESCRIPTION
-    wbso.py (--close|-c) [(--time|-t) ENDTIME]
+    wbso.py (--close|-c) [ENDTIME]
     wbso.py (--resume|-r) [INDEX]
     wbso.py (--delete|-d) INDEX
     wbso.py --clear
-    wbso.py --export [--merge|-m]
+    wbso.py --export
 
 Options:
-    --log -l                Log a session, optionally providing start and end times
-    --open -o               Alias for --log
     --close -c              End the current work session
     --resume -r             Resume the last session by duplicating it's description to a new open session
     --delete -d             Delete a session by index number
