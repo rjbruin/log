@@ -72,7 +72,9 @@ class Sessions(object):
             open_session.end = _time_to_datetime(end_time)
         else:
             open_session.end = datetime.datetime.now()
+
         self.open_session = None
+        return True
 
     def log(self, start, end, description):
         self.sessions.append(Session(
