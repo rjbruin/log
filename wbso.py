@@ -5,18 +5,17 @@ sessions.
 
 Usage:
     wbso.py
-    wbso.py DESCRIPTION
-    wbso.py START DESCRIPTION
-    wbso.py START END DESCRIPTION
+    wbso.py (DESCRIPTION | (--resume|-r) [INDEX])
+    wbso.py START (DESCRIPTION | (--resume|-r) [INDEX])
+    wbso.py START END (DESCRIPTION | (--resume|-r) [INDEX])
     wbso.py (--close|-c) [ENDTIME]
-    wbso.py (--resume|-r) [INDEX]
     wbso.py (--delete|-d) INDEX
     wbso.py --clear
     wbso.py --export
 
 Options:
     --close -c              End the current work session
-    --resume -r             Resume the last session by duplicating it's description to a new open session
+    --resume -r             Resume a session by duplicating it's description to this session
     --delete -d             Delete a session by index number
     --clear                 Clear all WBSO sessions
     --export                Export all sessions to comma-separated format for spreadsheets
@@ -176,18 +175,6 @@ if __name__ == '__main__':
             print("No session to close.")
         print(SESSIONS)
 
-    elif args['--resume']:
-        # Resume: duplicate last session as open session
-        if len(SESSIONS.get_all()) == 0:
-            print("No session to resume.")
-        else:
-            session_index = -1
-            if args['INDEX']:
-                session_index = int(args['INDEX'])
-            session_to_resume = SESSIONS.get_all()[session_index]
-            SESSIONS.start(session_to_resume.description)
-            print(SESSIONS)
-
     elif args['--delete']:
         # Delete
         SESSIONS.remove(int(args['INDEX']))
@@ -208,6 +195,24 @@ if __name__ == '__main__':
         else:
             SESSIONS.start(args['DESCRIPTION'], args['START'])
             print(SESSIONS)
+
+    elif args['--resume']:
+        # Resume: duplicate last session as open session
+        if len(SESSIONS.get_all()) == 0:
+            print("No session to resume.")
+        else:
+            session_index = -1
+            if args['INDEX']:
+                session_index = int(args['INDEX'])
+            session_to_resume = SESSIONS.get_all()[session_index]
+
+            # Log / open
+            if args['END']:
+                SESSIONS.log(args['START'], args['END'], session_to_resume.description)
+                print(SESSIONS)
+            else:
+                SESSIONS.start(session_to_resume.description, args['START'])
+                print(SESSIONS)
 
     elif args['--export']:
         # Export
