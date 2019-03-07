@@ -23,6 +23,11 @@ alias wbso="python3 <repo-path>/wbso.py"
 6. `wbso --clear`: delete all sessions.
 7. `wbso --export`: export all sessions as comma-separated lines. This format is compatible with the Sightcorp WBSO logging spreadsheet.
 
+**Recommended usage**
+
+- Try to log an open session when you start a task. Close the session when you're done. If you forget to open or close the session, or you forget to log it at all you can use the start and end times to retroactively log. The logging and resuming commans are very flexible in the time-related arguments! Any combination that makes sense is supported.
+- If you take a long break from a task you can end the open session, then later resume it using `-r` without index.
+
 ## Exporting to Sightcorp WBSO
 
 1. Use `wbso --export` to print all sessions in comma-separated format.
