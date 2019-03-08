@@ -241,7 +241,7 @@ if __name__ == '__main__':
         # Export each unique tuple (date, description)
         for date in sess_durations:
             for description in sess_durations[date]:
-                print("{:s},,{:s},{:.8f}".format(date, description, sess_durations[date][description]))
+                print("{:s},,{:s},{:.2f}".format(date, description, sess_durations[date][description]))
 
     else:
         # Report
