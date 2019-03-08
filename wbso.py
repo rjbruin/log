@@ -134,7 +134,7 @@ class Session(object):
         date_format = "%Y-%m-%d"
         formatted_start = self.start.strftime(date_format)
         duration = _duration_as_hours(self.start, self.end)
-        formatted_duration = "{:.8f}".format(duration)
+        formatted_duration = "{:.2f}".format(duration)
 
         return "{:s},,{:s},{:s}".format(formatted_start, self.description, formatted_duration)
 
