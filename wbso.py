@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """
 Log your WBSO work by timestamps. Calling without arguments shows the recorded
-sessions.
+sessions. Where times are to be given, use format HH:MM or named times "now"
+for the current timestamp or "last" for the end of the latest session.
 
 Usage:
     wbso.py
@@ -10,12 +11,15 @@ Usage:
     wbso.py START END (DESCRIPTION | (--resume|-r) [INDEX])
     wbso.py (--close|-c) [ENDTIME]
     wbso.py (--delete|-d) INDEX
+    wbso.py --cancel
     wbso.py --clear
     wbso.py --export
+    wbso.py --amend [INDEX] DESCRIPTION
 
 Options:
     --close -c              End the current work session
     --resume -r             Resume a session by duplicating it's description to this session
+    --cancel                Delete the current work session
     --delete -d             Delete a session by index number
     --clear                 Clear all WBSO sessions
     --export                Export all sessions to comma-separated format for spreadsheets
@@ -31,15 +35,6 @@ import pickle
 import json
 
 
-def _time_to_datetime(time_str):
-    time_format = "%H:%M"
-    struct_time = time.strptime(time_str, time_format)
-    now = datetime.datetime.today()
-    return datetime.datetime(now.year, now.month, now.day,
-                                struct_time.tm_hour,
-                                struct_time.tm_min,
-                                struct_time.tm_sec)
-
 def _duration_as_hours(start, end):
     duration = end - start
     return duration.total_seconds() / 3600
@@ -54,7 +49,7 @@ class Sessions(object):
             raise ValueError("There is already an open session:\n{:s}".format(self.get_open()))
 
         if start:
-            start = _time_to_datetime(start)
+            start = self.time_to_datetime(start)
         else:
             start = datetime.datetime.now()
 
@@ -68,7 +63,7 @@ class Sessions(object):
         open_session = self.sessions[self.open_session]
 
         if end_time:
-            open_session.end = _time_to_datetime(end_time)
+            open_session.end = self.time_to_datetime(end_time)
         else:
             open_session.end = datetime.datetime.now()
 
@@ -77,8 +72,8 @@ class Sessions(object):
 
     def log(self, start, end, description):
         self.sessions.append(Session(
-            _time_to_datetime(start),
-            _time_to_datetime(end),
+            self.time_to_datetime(start),
+            self.time_to_datetime(end),
             description
         ))
 
@@ -99,6 +94,29 @@ class Sessions(object):
 
     def get_open(self):
         return self.sessions[self.open_session]
+
+    def get_last_end_time(self):
+        if len(self.sessions) == 0:
+            return None
+        latest_end = self.sessions[0].end
+        for session in self.sessions[1:]:
+            if session.end > latest_end:
+                latest_end = session.end
+        return latest_end
+
+    def time_to_datetime(self, time_str):
+        if time_str == 'last':
+            return self.get_last_end_time()
+        elif time_str == 'now':
+            return datetime.datetime.today()
+
+        time_format = "%H:%M"
+        struct_time = time.strptime(time_str, time_format)
+        now = datetime.datetime.today()
+        return datetime.datetime(now.year, now.month, now.day,
+                                 struct_time.tm_hour,
+                                 struct_time.tm_min,
+                                 struct_time.tm_sec)
 
     def __str__(self):
         lines = []
@@ -181,11 +199,29 @@ if __name__ == '__main__':
         print("Sessions:")
         print(SESSIONS)
 
+    elif args['--cancel']:
+        # Cancel
+        if SESSIONS.open_session != None:
+            SESSIONS.remove(SESSIONS.open_session)
+        else:
+            print("No session to cancel.")
+        print(SESSIONS)
+
     elif args['--clear']:
         # Clear
         nr_sessions = len(SESSIONS.get_all())
         SESSIONS.clear()
         print("{:d} sessions cleared.".format(nr_sessions))
+
+    elif args['--amend']:
+        # Amend
+        session_index = -1
+        if args['INDEX']:
+            session_index = int(args['INDEX'])
+        session_to_amend = SESSIONS.get_all()[session_index]
+        session_to_amend.description = args['DESCRIPTION']
+        print("Session amended:")
+        print(session_to_amend)
 
     elif args['DESCRIPTION']:
         # Log / open
@@ -204,14 +240,14 @@ if __name__ == '__main__':
             session_index = -1
             if args['INDEX']:
                 session_index = int(args['INDEX'])
-            session_to_resume = SESSIONS.get_all()[session_index]
+            session_to_amend = SESSIONS.get_all()[session_index]
 
             # Log / open
             if args['END']:
-                SESSIONS.log(args['START'], args['END'], session_to_resume.description)
+                SESSIONS.log(args['START'], args['END'], session_to_amend.description)
                 print(SESSIONS)
             else:
-                SESSIONS.start(session_to_resume.description, args['START'])
+                SESSIONS.start(session_to_amend.description, args['START'])
                 print(SESSIONS)
 
     elif args['--export']:
