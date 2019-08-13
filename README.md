@@ -1,8 +1,8 @@
-# WBSO logging tool
+# Hour logging tool
 
 Log your work by description and timestamps for later export to a logging system.
 
-Copyright Sightcorp 2019.
+Originally built for and by [Sightcorp](https://sightcorp.com).
 
 ## Installation
 
